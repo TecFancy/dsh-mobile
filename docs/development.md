@@ -19,7 +19,7 @@ bash scripts/e2e-mobile.sh   # playwright-cli 视口矩阵冒烟(需运行中的
 ## 分支与提交
 
 - `development` 为开发分支,`main` 只接受 merge;禁止直接提交 `main`(除非用户明确要求)。
-- 提交信息 `type: subject`,`type ∈ feat/fix/docs/style/refactor/perf/test/build/ci/chore/revert`。
+- **PR 与提交信息一律使用英文**(包括 commit message 与 PR 标题/正文);`type: subject`,`type ∈ feat/fix/docs/style/refactor/perf/test/build/ci/chore/revert`。
 - 未经用户要求不 commit、不 push;push 前 `npm run verify`。
 
 ## 代码规约
