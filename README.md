@@ -29,8 +29,8 @@ desktop changes.
 Verified on Ubuntu 24.04 (x86_64) with DSH `0.1.0-rc.6`, iPhone-15 viewport
 (390×844).
 
-**New-session screen on a phone** (hero + composer laid out for the narrow
-viewport):
+**New-session screen on a phone** (hero + composer with a workspace
+selected, laid out for the narrow viewport):
 
 ![new session](assets/screenshots/after-new-session.png)
 
