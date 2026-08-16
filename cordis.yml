@@ -1,0 +1,14 @@
+# dsh-mobile plugin overlay (development mount).
+#
+# Mount for local development:
+#
+#   dsh web --patch ./cordis.yml
+#
+# The `name` points at the package DIRECTORY: the host loader imports the
+# package main (lib/index.js) while dsh-client-modules scans the package.json
+# `dsh.client` declaration and serves exports["./client"] (lib/client.js) to
+# the browser. Rebuild with `npm run watch` while developing; refresh the
+# page to pick up changes.
+- insert:
+    - id: dsh-mobile
+      name: '/Users/randal/source/dsh-mobile'
