@@ -53,4 +53,30 @@ export const SELECTOR_MAP: SelectorEntry[] = [
     fallback:
       'Re-anchor structurally (last child of the row); the invariant is: trailing never overlaps tools at ≤767px.',
   },
+  {
+    selector: '._7KE1Ra_trigger',
+    dshVersion: '0.1.0-rc.6',
+    usedBy: 'D2 model selector truncation (shell.css.ts)',
+    reason:
+      'The model selector button (inside .uV2eYG_trailing) has no semantic anchor; it must shrink on one-row layouts.',
+    fallback:
+      'Re-anchor structurally (first button of the trailing group); invariant: 命令/access/model share one row at ≤767px.',
+  },
+  {
+    selector: '._7KE1Ra_triggerLabel',
+    dshVersion: '0.1.0-rc.6',
+    usedBy: 'D2 model label ellipsis (shell.css.ts)',
+    reason:
+      'The model name label inside the trigger needs min-width:0 + ellipsis to truncate; no semantic anchor exists.',
+    fallback:
+      'Re-anchor structurally (first span of the trigger); invariant: overflow shows an ellipsis, never wraps.',
+  },
+  {
+    selector: '._7KE1Ra_triggerEffort',
+    dshVersion: '0.1.0-rc.6',
+    usedBy: 'D2 model effort chip (shell.css.ts)',
+    reason: 'The effort chip must never shrink or wrap when the label truncates.',
+    fallback:
+      'Re-anchor structurally (second span of the trigger); invariant: the effort chip stays intact on one row.',
+  },
 ]

@@ -43,7 +43,7 @@ for entry in "360|740" "390|844" "430|932"; do
   sleep 2
 
   # dismiss any onboarding dialog
-  probe "$s" "(() => { const d = document.querySelector('[role=dialog]'); if (d) { const b = [...d.querySelectorAll('button')].find(x => (x.innerText||'').includes('继续')); if (b) b.click(); } return 'ok' })()" >/dev/null
+  probe "$s" "(() => { const d = document.querySelector('[role=dialog]'); if (d) { const b = [...d.querySelectorAll('button')].find(x => /继续|Continue|Configure later|Later/.test(x.innerText||'')); if (b) b.click(); } return 'ok' })()" >/dev/null
 
   # wait for the plugin to apply (cold-start safe): body[data-dsh-mobile]
   for i in 1 2 3 4 5 6 7 8 9 10; do
@@ -55,7 +55,7 @@ for entry in "360|740" "390|844" "430|932"; do
   assert_mobile_geometry "$s" "initial"
 
   # open drawer
-  probe "$s" "(() => { const b = document.querySelector('button[aria-label=\"打开侧边栏\"]'); if (!b) return 'no-toggle'; b.click(); return 'opened' })()" >/dev/null
+  probe "$s" "(() => { const b = [...document.querySelectorAll('button')].find(b => /打开侧边栏|Open sidebar/.test(b.getAttribute('aria-label')||'')); if (!b) return 'no-toggle'; b.click(); return 'opened' })()" >/dev/null
   sleep 1.5
   json=$(probe "$s" "({
     drawer: document.body.hasAttribute('data-dsh-drawer'),
@@ -78,16 +78,24 @@ for entry in "360|740" "390|844" "430|932"; do
   echo "  [tap-outside] $closed"
   echo "$closed" | grep -Eq '"drawer": ?false' || fail "tap-outside did not close drawer"
 
+  # --- D2: composer row one-line + model ellipsis ---
+  probe "$s" "(() => { const c = [...document.querySelectorAll('button')].find(b => /收起侧边栏|Collapse sidebar/.test(b.innerText||'')); if (c) c.click(); return 'rail' })()" >/dev/null
+  sleep 1
+  json=$(probe "$s" "({ oneRow: (() => { const row = document.querySelector('.uV2eYG_row'); if (!row) return true; const ts = [...row.querySelectorAll('button')].map(b => Math.round(b.getBoundingClientRect().top)); return Math.max(...ts) - Math.min(...ts) <= 8; })(), modelW: (() => { const t = document.querySelector('._7KE1Ra_trigger'); return t ? Math.round(t.getBoundingClientRect().width) : 0 })(), labelEllipsis: (() => { const l = document.querySelector('._7KE1Ra_triggerLabel'); return l ? l.scrollWidth > l.clientWidth : false })() })")
+  echo "  [composer] $json"
+  echo "$json" | grep -Eq '"oneRow": ?true' || fail "composer buttons not on one row"
+  echo "$json" | grep -Eq '"labelEllipsis": ?true' || fail "model label not ellipsized"
+
   # --- M2: settings dialog re-flow (D3) ---
-  probe "$s" "(() => { const collapse = [...document.querySelectorAll('button')].find(b => (b.innerText||'').includes('收起侧边栏')); if (collapse) collapse.click(); const open = document.querySelector('button[aria-label="打开侧边栏"]'); if (open) open.click(); return 'drawer' })()" >/dev/null
+  probe "$s" "(() => { const collapse = [...document.querySelectorAll('button')].find(b => /收起侧边栏|Collapse sidebar/.test(b.innerText||'')); if (collapse) collapse.click(); const open = [...document.querySelectorAll('button')].find(b => /打开侧边栏|Open sidebar/.test(b.getAttribute('aria-label')||'')); if (open) open.click(); return 'drawer' })()" >/dev/null
   sleep 1.5
-  probe "$s" "(() => { const b = [...document.querySelectorAll('button')].find(x => (x.innerText||'').trim() === '设置'); if (b) b.click(); return 'settings' })()" >/dev/null
+  probe "$s" "(() => { const b = [...document.querySelectorAll('button')].find(x => ['设置','Settings'].includes((x.innerText||'').trim())); if (b) b.click(); return 'settings' })()" >/dev/null
   sleep 1.5
   json=$(probe "$s" "({ dlgW: (() => { const d = document.querySelector('[role=dialog]'); return d ? Math.round(d.getBoundingClientRect().width) : 0 })(), navDir: (() => { const d = document.querySelector('[role=dialog]'); return d ? getComputedStyle(d.querySelector('nav')).flexDirection : '' })(), contentW: (() => { const d = document.querySelector('[role=dialog]'); return d ? Math.round(d.querySelector(':scope > div:last-child').getBoundingClientRect().width) : 0 })() })")
   echo "  [settings] $json"
   echo "$json" | grep -Eq '"navDir": ?"row"' || fail "settings nav not horizontal"
   echo "$json" | grep -Eq '"contentW": ?[0-9]{3,}' || fail "settings content too narrow"
-  probe "$s" "(() => { const c = [...document.querySelectorAll('[role=dialog] button')].find(b => (b.getAttribute('aria-label')||'').includes('关闭')); if (c) c.click(); return 'closed' })()" >/dev/null
+  probe "$s" "(() => { const c = [...document.querySelectorAll('[role=dialog] button')].find(b => /关闭|Close/.test(b.getAttribute('aria-label')||'')); if (c) c.click(); return 'closed' })()" >/dev/null
   sleep 1
 
   # --- M2: details panel overlay (D4) ---
@@ -107,7 +115,7 @@ s="${PREFIX}-768"
 playwright-cli -s="$s" open "$DSH_URL" --device="Desktop Chrome"
 playwright-cli -s="$s" resize 768 1024 >/dev/null 2>&1 || true
 sleep 2.5
-probe "$s" "(() => { const d = document.querySelector('[role=dialog]'); if (d) { const b = [...d.querySelectorAll('button')].find(x => (x.innerText||'').includes('继续')); if (b) b.click(); } return 'ok' })()" >/dev/null
+probe "$s" "(() => { const d = document.querySelector('[role=dialog]'); if (d) { const b = [...d.querySelectorAll('button')].find(x => /继续|Continue|Configure later|Later/.test(x.innerText||'')); if (b) b.click(); } return 'ok' })()" >/dev/null
 json=$(probe "$s" "({ mobile: document.body.hasAttribute('data-dsh-mobile'), frameStyle: document.querySelector('#root > [data-slot=\"root\"] > div')?.getAttribute('style') })")
 echo "  $json"
 echo "$json" | grep -Eq '"mobile": ?false' || fail "768px must not activate mobile tier"
@@ -118,7 +126,7 @@ s="${PREFIX}-1440"
 playwright-cli -s="$s" open "$DSH_URL" --device="Desktop Chrome"
 playwright-cli -s="$s" resize 1440 900 >/dev/null 2>&1 || true
 sleep 2.5
-probe "$s" "(() => { const d = document.querySelector('[role=dialog]'); if (d) { const b = [...d.querySelectorAll('button')].find(x => (x.innerText||'').includes('继续')); if (b) b.click(); } return 'ok' })()" >/dev/null
+probe "$s" "(() => { const d = document.querySelector('[role=dialog]'); if (d) { const b = [...d.querySelectorAll('button')].find(x => /继续|Continue|Configure later|Later/.test(x.innerText||'')); if (b) b.click(); } return 'ok' })()" >/dev/null
 json=$(probe "$s" "({ mobile: document.body.hasAttribute('data-dsh-mobile'), frameStyle: document.querySelector('#root > [data-slot=\"root\"] > div')?.getAttribute('style'), sidebarPos: getComputedStyle(document.querySelector('#root > [data-slot=\"root\"] > div').firstElementChild).position })")
 echo "  $json"
 echo "$json" | grep -Eq '"mobile": ?false' || fail "desktop must not activate mobile tier"
