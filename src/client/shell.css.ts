@@ -150,6 +150,9 @@ export const SHELL_CSS = /* css */ `
 @media (max-width: 767px) {
   body[data-dsh-mobile] [role="dialog"] {
     flex-direction: column;
+    /* 100vh on phones includes the browser chrome; dvh tracks the visible
+       viewport so the dialog never extends past the screen */
+    height: min(800px, 100dvh - 48px);
   }
   body[data-dsh-mobile] [role="dialog"] > nav {
     flex-direction: row;
@@ -175,6 +178,10 @@ export const SHELL_CSS = /* css */ `
   body[data-dsh-mobile] [role="dialog"] > div:last-child {
     width: 100%;
     min-width: 0;
+    min-height: 0; /* the shell only sets min-width:0; in the stacked
+                      column layout min-height:auto would let the content
+                      grow past the dialog and break the inner scroll */
+    flex: 1 1 auto;
   }
   body[data-dsh-mobile] [role="dialog"] > div:last-child > div {
     padding-left: 14px;

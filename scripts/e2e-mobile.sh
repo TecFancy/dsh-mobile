@@ -95,6 +95,9 @@ for entry in "360|740" "390|844" "430|932"; do
   echo "  [settings] $json"
   echo "$json" | grep -Eq '"navDir": ?"row"' || fail "settings nav not horizontal"
   echo "$json" | grep -Eq '"contentW": ?[0-9]{3,}' || fail "settings content too narrow"
+  json=$(probe "$s" "({ scrollable: (() => { const o = document.querySelector('[role=dialog] [class*=options]'); return o ? o.scrollHeight > o.clientHeight : false })() })")
+  echo "  [settings-scroll] $json"
+  echo "$json" | grep -Eq '"scrollable": ?true' || fail "settings options not scrollable"
   probe "$s" "(() => { const c = [...document.querySelectorAll('[role=dialog] button')].find(b => /关闭|Close/.test(b.getAttribute('aria-label')||'')); if (c) c.click(); return 'closed' })()" >/dev/null
   sleep 1
 
