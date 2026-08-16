@@ -17,7 +17,7 @@
 
 在 Ubuntu 24.04(x86_64)上、DSH `0.1.0-rc.6`、iPhone 15 视口(390×844)实测截图。
 
-**手机上的新建会话界面**(hero 与 composer 按窄屏布局排版):
+**手机上的新建会话界面**(选中工作区后,hero 与 composer 按窄屏布局排版):
 
 ![new session](assets/screenshots/after-new-session.png)
 
