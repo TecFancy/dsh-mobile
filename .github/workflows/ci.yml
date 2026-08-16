@@ -1,0 +1,26 @@
+name: ci
+
+on:
+  push:
+    branches: [development]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run verify
+      # lib/ is generated output committed alongside src/ (dsh-auth-gate rule);
+      # CI fails on drift so a PR can never land a stale bundle.
+      - run: |
+          git diff --exit-code -- lib || {
+            echo "lib/ drift: rebuild with 'npm run build' and commit the result";
+            exit 1;
+          }

@@ -1,0 +1,16 @@
+# dsh-mobile bundle patch: inserts the mobile adapter client plugin.
+#
+# Mount into a profile either by adding "@tecfancy/dsh-mobile" to the
+# profile's `dsh.profile.bundles` list (recommended), or by inserting the
+# same row through a user patch layer:
+#
+#   - insert:
+#       - id: dsh-mobile
+#         name: '@tecfancy/dsh-mobile'
+#
+# The `name` is the npm package itself; the loader resolves it from the
+# profile's node_modules (installed via `dsh plugin` or the profile's own
+# package manager).
+- insert:
+    - id: dsh-mobile
+      name: '@tecfancy/dsh-mobile'

@@ -1,0 +1,45 @@
+name: publish
+
+# PR-triggered release: merging a PR into `main` publishes the package to npm
+# when the version has not been published yet. The npm token comes from the
+# `NPM_TOKEN` repository secret (set via `gh secret set NPM_TOKEN`).
+on:
+  push:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run verify
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org/
+          cache: npm
+      - run: npm ci
+      - name: Publish (skip when the version is already on the registry)
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          if npm view "@tecfancy/dsh-mobile@${VERSION}" version >/dev/null 2>&1; then
+            echo "version ${VERSION} already published — skipping"
+          else
+            npm publish --access public
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
