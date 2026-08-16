@@ -1,5 +1,7 @@
 # dsh-mobile
 
+[English](README.md) | **简体中文**
+
 **DeepSeek Harness(DSH)Web 壳层的移动端适配插件。** 原生壳层是桌面优先设计:窄于 1024px 时侧边栏只会自动收起成窄栏;手机上展开抽屉会把主内容区挤到约 110px、composer 按钮互相覆盖、设置弹窗被压成一条缝。`dsh-mobile` 以客户端插件的形式补上缺失的手机档(< 768px)——不改壳层源码,不动桌面端。
 
 [![npm version](https://img.shields.io/npm/v/@tecfancy/dsh-mobile)](https://www.npmjs.com/package/@tecfancy/dsh-mobile)
@@ -15,7 +17,7 @@
 
 ## 截图
 
-在 Ubuntu 24.04(x86_64)上、DSH `0.1.0-rc.6`、iPhone 15 视口(390×844)实测截图。
+在 Ubuntu 24.04(x86_64)上、DSH `0.1.0-rc.6`、iPhone 15 视口(390×844)实测截图(英文界面)。
 
 **手机上的新建会话界面**(选中工作区后,hero 与 composer 按窄屏布局排版):
 

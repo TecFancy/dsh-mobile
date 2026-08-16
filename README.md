@@ -1,5 +1,7 @@
 # dsh-mobile
 
+**English** | [简体中文](README.zh.md)
+
 **A mobile adapter for the DeepSeek Harness (DSH) web shell.** The stock
 shell is desktop-first: below 1024px the sidebar only collapses to a rail, and
 on phones the expanded drawer squeezes the main column to ~110px, composer
@@ -27,7 +29,7 @@ desktop changes.
 ## Screenshots
 
 Verified on Ubuntu 24.04 (x86_64) with DSH `0.1.0-rc.6`, iPhone-15 viewport
-(390×844).
+(390×844). Screenshots show the English UI.
 
 **New-session screen on a phone** (hero + composer with a workspace
 selected, laid out for the narrow viewport):
