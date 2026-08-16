@@ -18,6 +18,7 @@ import type { Context } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
 import { subscribeNarrow } from './breakpoints.ts'
 import { observeFrameState, whenFrame, FRAME_SELECTOR } from './drawer-state.ts'
+import { installMobileFocusGuard } from './focus-guard.ts'
 import { SHELL_CSS } from './shell.css.ts'
 
 export const name = 'dsh-mobile'
@@ -82,4 +83,11 @@ export function apply(ctx: Context): void {
       document.removeEventListener('click', onClick, true)
     }
   }, 'dsh-mobile: tap outside closes drawer')
+
+  // Mobile focus guard: the shell auto-focuses the composer, which pops the
+  // on-screen keyboard immediately on phones. The guard blurs the first
+  // pre-interaction composer focus on narrow viewports (desktop untouched).
+  ctx.effect(() => {
+    return installMobileFocusGuard(document)
+  }, 'dsh-mobile: mobile focus guard')
 }

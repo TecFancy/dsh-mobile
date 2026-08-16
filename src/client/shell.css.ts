@@ -141,6 +141,39 @@ export const SHELL_CSS = /* css */ `
   }
 }
 
+/* ---------- D6: composer touch targets on phones (0.1.7) ----------
+   The toolbar icon buttons are 28-34px — below the 44px touch guideline.
+   Expand the hit area with an invisible ::after overlay so the visual
+   layout (and the one-row contract) stays untouched: 28px buttons gain
+   8px on every side (44), 34px send gains 5px (44), the 28px-tall
+   triggers gain 8px top/bottom (44 tall; access trigger is already 44
+   wide). Registered hashed classes: selector-map.ts. */
+@media (max-width: 767px) {
+  body[data-dsh-mobile] [data-slot="conversation.composer.bar"] .uV2eYG_add,
+  body[data-dsh-mobile] [data-slot="conversation.composer.bar"] .uV2eYG_primary,
+  body[data-dsh-mobile] [data-slot="conversation.composer.bar"] .Sh0Q9G_trigger,
+  body[data-dsh-mobile] [data-slot="conversation.composer.bar"] ._7KE1Ra_trigger {
+    position: relative;
+  }
+  body[data-dsh-mobile] [data-slot="conversation.composer.bar"] .uV2eYG_add::after,
+  body[data-dsh-mobile] [data-slot="conversation.composer.bar"] .uV2eYG_primary::after,
+  body[data-dsh-mobile] [data-slot="conversation.composer.bar"] .Sh0Q9G_trigger::after,
+  body[data-dsh-mobile] [data-slot="conversation.composer.bar"] ._7KE1Ra_trigger::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -8px;
+    bottom: -8px;
+  }
+  /* square icon buttons also widen: 28+16 = 44; send 34+10 = 44 */
+  body[data-dsh-mobile] [data-slot="conversation.composer.bar"] .uV2eYG_add::after,
+  body[data-dsh-mobile] [data-slot="conversation.composer.bar"] .uV2eYG_primary::after {
+    left: -8px;
+    right: -8px;
+  }
+}
+
 /* ---------- D3: settings dialog re-flow (M2) ----------
    The dialog is a fixed 800px flex row (nav 188px + content); on phones the
    content column is squeezed to ~157px and selectors overflow the panel

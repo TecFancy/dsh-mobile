@@ -79,4 +79,31 @@ export const SELECTOR_MAP: SelectorEntry[] = [
     fallback:
       'Re-anchor structurally (second span of the trigger); invariant: the effort chip stays intact on one row.',
   },
+  {
+    selector: '.uV2eYG_add',
+    dshVersion: '0.1.0-rc.6',
+    usedBy: 'D6 touch targets (shell.css.ts)',
+    reason:
+      'The 28px commands icon button needs a wider hit area on phones; no semantic anchor exists below the bar slot.',
+    fallback:
+      'Re-anchor structurally (first button of the row); invariant: effective touch area >= 44px at <=767px.',
+  },
+  {
+    selector: '.uV2eYG_primary',
+    dshVersion: '0.1.0-rc.6',
+    usedBy: 'D2 one-row layout + D6 touch targets (shell.css.ts)',
+    reason:
+      'The send button must not shrink in the one-row layout and needs a 44px hit area on phones.',
+    fallback:
+      'Re-anchor structurally (last button of the trailing group); invariants: flex none + >= 44px touch area.',
+  },
+  {
+    selector: '.Sh0Q9G_trigger',
+    dshVersion: '0.1.0-rc.6',
+    usedBy: 'D6 touch targets (shell.css.ts)',
+    reason:
+      'The access-mode trigger is 44px wide but only 28px tall; the hit area needs vertical expansion on phones.',
+    fallback:
+      'Re-anchor structurally (second button of the row); invariant: >= 44px tall touch area at <=767px.',
+  },
 ]
