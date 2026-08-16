@@ -29,6 +29,11 @@ desktop changes.
 Verified on Ubuntu 24.04 (x86_64) with DSH `0.1.0-rc.6`, iPhone-15 viewport
 (390×844).
 
+**New-session screen on a phone** (hero + composer laid out for the narrow
+viewport):
+
+![new session](assets/screenshots/after-new-session.png)
+
 **Sidebar drawer: before (stock shell) vs after**
 
 | Before — content squeezed to 110px              | After — overlay drawer + scrim                |
