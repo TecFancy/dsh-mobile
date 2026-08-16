@@ -26,9 +26,11 @@ assert_mobile_geometry() { # $1 session $2 label
     frameStyle: document.querySelector('#root > [data-slot=\"root\"] > div')?.getAttribute('style'),
     vw: document.documentElement.clientWidth,
     hOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    notFocused: (() => { const ae = document.activeElement; return !(ae && ae.matches && ae.matches('textarea, input, [contenteditable]')); })(),
   })")
   echo "  [$label] $json"
   echo "$json" | grep -Eq '"mobile": ?true' || fail "$label: data-dsh-mobile not set"
+  echo "$json" | grep -Eq '"notFocused": ?true' || fail "$label: composer auto-focused (keyboard would pop)"
 }
 
 for entry in "360|740" "390|844" "430|932"; do
