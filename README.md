@@ -1,47 +1,84 @@
 # dsh-mobile
 
-Mobile adapter for the DSH web shell — a client-plane Cordis plugin that
-retrofits a phone tier (< 768px) onto the desktop-first shell: overlay
-sidebar/details drawers with a scrim, a non-overlapping composer row, and a
-re-flowed settings dialog. Desktop (≥ 1024px) is untouched.
+**A mobile adapter for the DeepSeek Harness (DSH) web shell.** The stock
+shell is desktop-first: below 1024px the sidebar only collapses to a rail, and
+on phones the expanded drawer squeezes the main column to ~110px, composer
+buttons overlap, and the settings dialog shrinks to a sliver. `dsh-mobile`
+adds the missing phone tier (< 768px) as a client plugin — no shell fork, no
+desktop changes.
 
-- 📋 Plan: [docs/dsh-mobile-plan.md](docs/dsh-mobile-plan.md) (简体中文,detailed)
-- 📐 M1 spec: [docs/impl-m1.md](docs/impl-m1.md)
-- 🔧 Conventions: [docs/development.md](docs/development.md)
+[![npm version](https://img.shields.io/npm/v/@tecfancy/dsh-mobile)](https://www.npmjs.com/package/@tecfancy/dsh-mobile)
+[![License](https://img.shields.io/npm/l/@tecfancy/dsh-mobile)](LICENSE)
 
-## Why
+## Features
 
-The DSH shell's core layout packages (`dsh-client-ui-layout`,
-`dsh-client-ui-conversation`, `dsh-client-ui-settings-general`) ship no width
-media queries. Below 1024px the sidebar only auto-collapses to a rail; on
-phones the expanded drawer squeezes the main column to ~105px, the composer
-row's mode buttons overlap, and the settings dialog content column shrinks to
-157px. This plugin adds the missing tier without forking the shell.
+- **Overlay sidebar drawer** — opening the sidebar on a phone floats it over
+  the content with a scrim instead of squeezing the main column to 110px;
+  tapping outside closes it.
+- **Overlay details panel** — the tool-details panel opens as a right-side
+  overlay and never squeezes the conversation.
+- **Non-overlapping composer** — the mode buttons and the model selector wrap
+  onto separate rows instead of covering each other.
+- **Re-flowed settings dialog** — the dialog stacks vertically with a
+  horizontally scrollable tab bar; the content column gets full width.
+- **Zero desktop regression** — every rule hangs under a narrow-viewport
+  marker; viewports ≥ 1024px behave exactly like the stock shell.
+
+## Screenshots
+
+Verified on Ubuntu 24.04 (x86_64) with DSH `0.1.0-rc.6`, iPhone-15 viewport
+(390×844).
+
+**Sidebar drawer: before (stock shell) vs after**
+
+| Before — content squeezed to 110px              | After — overlay drawer + scrim                |
+| ----------------------------------------------- | --------------------------------------------- |
+| ![before](assets/screenshots/before-drawer.png) | ![after](assets/screenshots/after-drawer.png) |
+
+**Settings dialog on a phone** (vertical layout, full-width content):
+
+![settings](assets/screenshots/after-settings.png)
+
+**Desktop ≥ 1024px — untouched**:
+
+![desktop](assets/screenshots/after-desktop.png)
 
 ## Install
 
+Requires Node ≥ 22 and a DSH installation (`dsh` CLI). Install into your
+profile and restart `dsh web`:
+
 ```bash
-# publish path (into a dsh profile, alongside other bundles)
-dsh plugin --profile web add ./tecfancy-dsh-mobile-0.1.0.tgz
-# dev path
-npm run watch
-dsh web --patch ./cordis.yml
+dsh plugin --profile web add @tecfancy/dsh-mobile
+# restart: dsh web
 ```
 
-Add `@tecfancy/dsh-mobile` to `dsh.profile.bundles` (the `dsh plugin` command does
-this automatically), then restart `dsh web`.
+> Note: if your npm registry is a mirror (e.g. `registry.npmmirror.com`),
+> brand-new packages can lag behind the official registry for a while —
+> add `--registry=https://registry.npmjs.org/` if the install reports 404.
+
+The plugin activates automatically on narrow viewports (< 768px) and stays
+inert on desktop. Removing it is one command: `dsh plugin --profile web remove
+@tecfancy/dsh-mobile`.
 
 ## How it works
 
-- `body[data-dsh-mobile]` marks narrow viewports (JS breakpoint layer,
-  `innerWidth` on resize; paired CSS `@media (max-width: 767px)`).
-- A `MutationObserver` mirrors the AppFrame's inline
-  `grid-template-columns` state to `body[data-dsh-drawer]` /
-  `body[data-dsh-details]` so CSS can react to panel state.
-- All rules anchor on `[data-slot="…"]` semantic hooks and `#root`
-  structural paths; hashed class selectors are registered in
-  `src/client/selector-map.ts` and version-pinned.
-- Tap-outside closes the drawer through the shell's `layout` service.
+- A JS breakpoint layer marks narrow viewports as `body[data-dsh-mobile]`.
+- A state bridge mirrors the shell's layout state onto `body[data-dsh-drawer]`
+  / `body[data-dsh-details]`.
+- A stylesheet (anchored on the shell's stable `[data-slot]` hooks) turns the
+  sidebar/details columns into fixed overlays on phones, re-flows the
+  composer and the settings dialog, and never runs outside the mobile tier.
+
+No shell source is modified, no server component is required, and the plugin
+coexists with other shell-level plugins (verified with `dsh-better-sidebar`).
+
+## Compatibility
+
+- DSH `0.1.0-rc.6` (tested on macOS and Ubuntu 24.04; full viewport matrix:
+  360 / 390 / 430 / 768 / 1440).
+- The 768–1023px tablet range keeps the stock shell behavior (by design).
+- `prefers-reduced-motion` is honored.
 
 ## License
 

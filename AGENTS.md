@@ -23,6 +23,7 @@ Desktop (≥ 1024px) must never change.
 
 ## Hard rules
 
+- **PRs and commit messages are written in English** (title and body).
 - Every CSS rule must hang under `body[data-dsh-mobile]`; the desktop path
   is untouchable.
 - Hashed CSS-module class selectors require a `src/client/selector-map.ts`

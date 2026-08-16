@@ -1,7 +1,7 @@
 {
   "name": "@tecfancy/dsh-mobile",
-  "version": "0.1.0",
-  "description": "DSH web shell mobile adapter plugin: overlay sidebar/details drawers, responsive composer row and settings dialog below 768px, zero desktop regression.",
+  "version": "0.1.1",
+  "description": "DSH web shell mobile adapter plugin: overlay sidebar/details drawers, responsive composer and settings below 768px, zero desktop regression. DSH Web 移动端适配插件:抽屉浮层化、输入栏与设置页响应式适配,桌面零回归。",
   "type": "module",
   "license": "MIT",
   "keywords": [
@@ -36,7 +36,8 @@
     "cordis.patch.yml",
     "README.md",
     "README.zh.md",
-    "LICENSE"
+    "LICENSE",
+    "assets"
   ],
   "dsh": {
     "bundle": {
@@ -81,5 +82,13 @@
     "typescript": "^5.6.0",
     "typescript-eslint": "^8.58.2",
     "vitest": "^4.1.8"
+  },
+  "homepage": "https://github.com/TecFancy/dsh-mobile",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TecFancy/dsh-mobile.git"
+  },
+  "bugs": {
+    "url": "https://github.com/TecFancy/dsh-mobile/issues"
   }
 }
