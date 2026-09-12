@@ -1,13 +1,15 @@
 /**
  * AppFrame grid-state observation (M1, decisions D2/D6 in docs/impl-m1.md).
  *
- * The shell's three-column layout state lives ONLY in the frame's inline
- * `grid-template-columns` (verified: `56px minmax(0px, 1fr) 0px` rail,
- * `280px minmax(0px, 1fr) 0px` drawer open, third track > 0 when the details
- * panel is open). This module parses that inline value into a small state
- * object and observes changes via MutationObserver, so the client entry can
- * mirror the state onto `body[data-dsh-drawer]` / `body[data-dsh-details]`
- * attributes that the stylesheet keys off.
+ * The shell's three-column layout state lives in the frame's semantic
+ * attributes and inline `grid-template-columns`. The shell renders
+ * `56px minmax(0, 1fr) 0px` for the rail (bare `0`, no unit — verified
+ * against dsh-client-ui-layout 0.1.0-rc.6 and 0.1.2-rc.1) and sets
+ * `data-sidebar-collapsed` / `data-details-collapsed` on the frame. This
+ * module reads BOTH: the attributes are authoritative when present, the
+ * inline style is the fallback. Changes are observed via MutationObserver,
+ * so the client entry can mirror the state onto `body[data-dsh-drawer]` /
+ * `body[data-dsh-details]` attributes that the stylesheet keys off.
  *
  * The parse is a pure function so the state mapping is unit-testable without
  * a DOM.
@@ -25,7 +27,8 @@ export interface FrameGridState {
   detailsOpen: boolean
 }
 
-const TRACKS = /^(\d+(?:\.\d+)?)px\s+minmax\(0px,\s*1fr\)\s+(\d+(?:\.\d+)?)px$/
+// The shell emits `minmax(0, 1fr)` (older snapshots used `minmax(0px, 1fr)`).
+const TRACKS = /^(\d+(?:\.\d+)?)px\s+minmax\(0(?:px)?,\s*1fr\)\s+(\d+(?:\.\d+)?)px$/
 
 /**
  * Parse an inline `grid-template-columns` value into frame state.
@@ -57,11 +60,27 @@ export function observeFrameState(
   callback: (state: FrameGridState) => void,
 ): () => void {
   const read = (): void => {
+    // Semantic attributes are authoritative when the shell provides them
+    // (0.1.0-rc.6 and 0.1.2-rc.1 both do; absent ⇔ expanded); the inline
+    // style is the fallback when neither attribute is set.
+    const sidebarCollapsed = frame.hasAttribute('data-sidebar-collapsed')
+    const detailsCollapsed = frame.hasAttribute('data-details-collapsed')
+    if (sidebarCollapsed || detailsCollapsed) {
+      callback({
+        rail: sidebarCollapsed,
+        drawerOpen: !sidebarCollapsed,
+        detailsOpen: !detailsCollapsed,
+      })
+      return
+    }
     callback(parseGridState(frame.style.gridTemplateColumns))
   }
   read()
   const observer = new MutationObserver(read)
-  observer.observe(frame, { attributes: true, attributeFilter: ['style'] })
+  observer.observe(frame, {
+    attributes: true,
+    attributeFilter: ['style', 'data-sidebar-collapsed', 'data-details-collapsed'],
+  })
   return () => {
     observer.disconnect()
   }

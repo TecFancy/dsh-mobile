@@ -8,6 +8,17 @@ import {
 } from './drawer-state.ts'
 
 describe('parseGridState', () => {
+  // The shell (dsh-client-ui-layout 0.1.0-rc.6 AND 0.1.2-rc.1) renders the
+  // middle track as `minmax(0, 1fr)` — bare 0, no unit. The old parser only
+  // accepted `minmax(0px, 1fr)`, which never matched the real shell.
+  it('recognizes the shell-emitted bare-zero minmax form', () => {
+    expect(parseGridState('56px minmax(0, 1fr) 0px')).toEqual({ rail: true, drawerOpen: false, detailsOpen: false })
+    expect(parseGridState('280px minmax(0, 1fr) 0px')).toEqual({ rail: false, drawerOpen: true, detailsOpen: false })
+    expect(parseGridState('56px minmax(0, 1fr) 360px')).toEqual({ rail: true, drawerOpen: false, detailsOpen: true })
+    expect(parseGridState('280px minmax(0, 1fr) 360px')).toEqual({ rail: false, drawerOpen: true, detailsOpen: true })
+  })
+
+
   it('recognizes the collapsed rail state', () => {
     const state = parseGridState('56px minmax(0px, 1fr) 0px')
     expect(state).toEqual({ rail: true, drawerOpen: false, detailsOpen: false })
