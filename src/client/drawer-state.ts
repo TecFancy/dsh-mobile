@@ -2,13 +2,18 @@
  * AppFrame grid-state observation (M1, decisions D2/D6 in docs/impl-m1.md).
  *
  * The shell's three-column layout state lives in the frame's semantic
- * attributes and inline `grid-template-columns`. The shell renders
- * `56px minmax(0, 1fr) 0px` for the rail (bare `0`, no unit — verified
- * against dsh-client-ui-layout 0.1.0-rc.6 and 0.1.2-rc.1) and sets
- * `data-sidebar-collapsed` / `data-details-collapsed` on the frame. This
- * module reads BOTH: the attributes are authoritative when present, the
- * inline style is the fallback. Changes are observed via MutationObserver,
- * so the client entry can mirror the state onto `body[data-dsh-drawer]` /
+ * attributes and inline `grid-template-columns`. The shell source renders
+ * `${sidebar}px minmax(0, 1fr) ${details}px`, but the CSSOM serializes the
+ * bare `0` as `0px`, so the value actually read back from the live DOM is
+ * `56px minmax(0px, 1fr) 0px` (verified in a running 0.1.5-rc.2 shell — do
+ * not conclude "the parser never matches" from the source string alone).
+ * Both spellings are accepted. The frame also carries
+ * `data-sidebar-collapsed` plus `data-details-collapsed` (0.1.0-rc.6 /
+ * 0.1.2-rc.1) — renamed to `data-rightbar-collapsed` in 0.1.5-rc.x, so the
+ * attribute fast path below must recognize every known name. This module
+ * reads BOTH: the attributes are authoritative when present, the inline
+ * style is the fallback. Changes are observed via MutationObserver, so the
+ * client entry can mirror the state onto `body[data-dsh-drawer]` /
  * `body[data-dsh-details]` attributes that the stylesheet keys off.
  *
  * The parse is a pure function so the state mapping is unit-testable without
@@ -27,7 +32,8 @@ export interface FrameGridState {
   detailsOpen: boolean
 }
 
-// The shell emits `minmax(0, 1fr)` (older snapshots used `minmax(0px, 1fr)`).
+// Source says `minmax(0, 1fr)`; the DOM serializes it as `minmax(0px, 1fr)`.
+// Accept both so the parse never depends on which side of the browser it runs.
 const TRACKS = /^(\d+(?:\.\d+)?)px\s+minmax\(0(?:px)?,\s*1fr\)\s+(\d+(?:\.\d+)?)px$/
 
 /**
@@ -61,10 +67,15 @@ export function observeFrameState(
 ): () => void {
   const read = (): void => {
     // Semantic attributes are authoritative when the shell provides them
-    // (0.1.0-rc.6 and 0.1.2-rc.1 both do; absent ⇔ expanded); the inline
-    // style is the fallback when neither attribute is set.
+    // (0.1.0-rc.6 / 0.1.2-rc.1: `data-details-collapsed`; 0.1.5-rc.x renamed
+    // the details column to "rightbar" and the attribute with it). They are
+    // presence-only — the shell renders `attr || void 0`, so absence means
+    // expanded. The inline style is the fallback when the shell exposes none
+    // of them; reading only SOME of the known attributes would silently report
+    // the details panel as open on a shell whose name is not handled yet.
     const sidebarCollapsed = frame.hasAttribute('data-sidebar-collapsed')
-    const detailsCollapsed = frame.hasAttribute('data-details-collapsed')
+    const detailsCollapsed =
+      frame.hasAttribute('data-details-collapsed') || frame.hasAttribute('data-rightbar-collapsed')
     if (sidebarCollapsed || detailsCollapsed) {
       callback({
         rail: sidebarCollapsed,
@@ -79,7 +90,12 @@ export function observeFrameState(
   const observer = new MutationObserver(read)
   observer.observe(frame, {
     attributes: true,
-    attributeFilter: ['style', 'data-sidebar-collapsed', 'data-details-collapsed'],
+    attributeFilter: [
+      'style',
+      'data-sidebar-collapsed',
+      'data-details-collapsed',
+      'data-rightbar-collapsed',
+    ],
   })
   return () => {
     observer.disconnect()
