@@ -8,6 +8,32 @@ import {
 } from './drawer-state.ts'
 
 describe('parseGridState', () => {
+  // The shell source spells the middle track `minmax(0, 1fr)` (bare 0, no
+  // unit) and the CSSOM serializes it back as `minmax(0px, 1fr)`, so both
+  // forms reach parseGridState depending on where the value comes from.
+  it('recognizes the shell-emitted bare-zero minmax form', () => {
+    expect(parseGridState('56px minmax(0, 1fr) 0px')).toEqual({
+      rail: true,
+      drawerOpen: false,
+      detailsOpen: false,
+    })
+    expect(parseGridState('280px minmax(0, 1fr) 0px')).toEqual({
+      rail: false,
+      drawerOpen: true,
+      detailsOpen: false,
+    })
+    expect(parseGridState('56px minmax(0, 1fr) 360px')).toEqual({
+      rail: true,
+      drawerOpen: false,
+      detailsOpen: true,
+    })
+    expect(parseGridState('280px minmax(0, 1fr) 360px')).toEqual({
+      rail: false,
+      drawerOpen: true,
+      detailsOpen: true,
+    })
+  })
+
   it('recognizes the collapsed rail state', () => {
     const state = parseGridState('56px minmax(0px, 1fr) 0px')
     expect(state).toEqual({ rail: true, drawerOpen: false, detailsOpen: false })
@@ -64,6 +90,40 @@ describe('observeFrameState', () => {
     frame.style.gridTemplateColumns = '56px minmax(0px, 1fr) 360px'
     await new Promise((resolve) => setTimeout(resolve, 0))
     expect(seen).toEqual(['rail', 'open']) // no notification after dispose
+  })
+
+  // The shell renders the semantic attributes as presence-only booleans
+  // (`attr || void 0`), and the details column was renamed to "rightbar" in
+  // 0.1.5-rc.x together with its attribute.
+  it('reads the 0.1.0-rc.6/0.1.2-rc.1 details attribute', async () => {
+    const frame = document.createElement('div')
+    frame.style.gridTemplateColumns = '56px minmax(0, 1fr) 0px'
+    frame.setAttribute('data-sidebar-collapsed', '')
+    frame.setAttribute('data-details-collapsed', '')
+    const seen: unknown[] = []
+    const off = observeFrameState(frame, (state) => {
+      seen.push({ ...state })
+    })
+    frame.removeAttribute('data-details-collapsed')
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(seen).toEqual([
+      { rail: true, drawerOpen: false, detailsOpen: false },
+      { rail: true, drawerOpen: false, detailsOpen: true },
+    ])
+    off()
+  })
+
+  it('reads the 0.1.5-rc.x rightbar attribute without inventing an open details panel', () => {
+    const frame = document.createElement('div')
+    frame.style.gridTemplateColumns = '56px minmax(0, 1fr) 0px'
+    frame.setAttribute('data-sidebar-collapsed', '')
+    frame.setAttribute('data-rightbar-collapsed', '')
+    const seen: unknown[] = []
+    const off = observeFrameState(frame, (state) => {
+      seen.push({ ...state })
+    })
+    expect(seen).toEqual([{ rail: true, drawerOpen: false, detailsOpen: false }])
+    off()
   })
 })
 
